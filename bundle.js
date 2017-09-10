@@ -54,6 +54,27 @@ var makeCommit = function(commit) {
   return li;
 }
 
+var parseMarkdown = function(text, context) {
+  var message = document.createElement("div");
+  message.className = "message markdown-body";
+  var blockquote = document.createElement("blockquote");
+  message.appendChild(blockquote);
+  $.ajax("https://api.github.com/markdown?access_token=" + token, {
+      data: JSON.stringify({
+        "text": text,
+        "mode": "gfm",
+        "context": context
+      }),
+      contentType: "application/json",
+      dataType: "html",
+      type: "post"
+    }).success(function(response) {
+      blockquote.innerHTML = response;
+      return true;
+    });
+  return message;
+}
+
 $(function() {
   var author, branch, ref, commit_cb, callback, limit, params, repo, title, url, urls, username, results, keys, dash, ajax, i, j;
   params = $.getUrlVars();
@@ -68,7 +89,7 @@ $(function() {
   commit_cb = function(response, id, h) {
     if (response.data.author == null) {
       results[id].payload.commits[h].author = {
-        "login": response.data.commit.author.email,
+        "login": results[id].payload.commits[h].author.name,
         "avatar_url": "https://camo.githubusercontent.com/cb4bdc3bef6afa9598846faa814977d47ecce847/68747470733a2f2f312e67726176617461722e636f6d2f6176617461722f38313766393462616130333637633839653265313336323236366434353733323f643d68747470732533412532462532466173736574732d63646e2e6769746875622e636f6d253246696d6167657325324667726176617461727325324667726176617461722d757365722d3432302e706e6726723d7826733d313430?"
       }
     } else {
@@ -165,7 +186,7 @@ $(function() {
             }
             ref = "<span" + cls + ">" + result.payload.ref + "</span> at ";
           }
-          action = "deleted " + result.payload.ref_type + " " + branch + makeLink(result, "https://github.com/" + result.repo.name, result.repo.name, "repo");
+          action = "deleted " + result.payload.ref_type + " " + ref + makeLink(result, "https://github.com/" + result.repo.name, result.repo.name, "repo");
         } else if (result.type == "ForkEvent") {
           item.className += "fork";
           details.innerHTML = "<svg aria-label=\"Fork\" class=\"octicon octicon-repo-forked dashboard-event-icon\" height=\"16\" role=\"img\" version=\"1.1\" viewBox=\"0 0 10 16\" width=\"10\"><path fill-rule=\"evenodd\" d=\"M8 1a1.993 1.993 0 0 0-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 0 0 2 1a1.993 1.993 0 0 0-1 3.72V6.5l3 3v1.78A1.993 1.993 0 0 0 5 15a1.993 1.993 0 0 0 1-3.72V9.5l3-3V4.72A1.993 1.993 0 0 0 8 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"/></svg>";
@@ -266,7 +287,7 @@ $(function() {
           item.className += "issues_comment";
           body.innerHTML = "<svg aria-label=\"Commit comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
           action = "commented on commit " + makeLink(result, result.payload.comment.html_url, result.repo.name + "@" + result.payload.comment.commit_id.substring(0, 10), "commit-comment");
-          details.innerHTML += "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
+          details.appendChild(parseMarkdown(result.payload.comment.body, result.repo.name));
         } else if (result.type == "IssueCommentEvent") {
           item.className += "issues_comment";
           body.innerHTML = "<svg aria-label=\"Issue comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
@@ -275,12 +296,12 @@ $(function() {
             type = "pull request";
           }
           action = "commented on " + type + " " + makeLink(result, result.payload.comment.html_url, result.repo.name + "#" + result.payload.issue.number, "issue-comment", result.payload.issue.title);
-          details.innerHTML += "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
+          details.appendChild(parseMarkdown(result.payload.comment.body, result.repo.name));
         } else if (result.type == "PullRequestReviewCommentEvent") {
           item.className += "pull_request_review_comment";
           body.innerHTML = "<svg aria-label=\"Review pull request comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
           action = "commented on pull request " + makeLink(result, result.payload.comment.html_url, result.repo.name + "#" + result.payload.pull_request.number, "pull-request-review-comment");
-          details.innerHTML += "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
+          details.appendChild(parseMarkdown(result.payload.comment.body, result.repo.name));
         } else if (result.type == "GollumEvent") {
           item.className += "gollum";
           body.innerHTML = "<svg aria-label=\"Gollum\" class=\"octicon octicon-book dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M3 5h4v1H3V5zm0 3h4V7H3v1zm0 2h4V9H3v1zm11-5h-4v1h4V5zm0 2h-4v1h4V7zm0 2h-4v1h4V9zm2-6v9c0 .55-.45 1-1 1H9.5l-1 1-1-1H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h5.5l1 1 1-1H15c.55 0 1 .45 1 1zm-8 .5L7.5 3H2v9h6V3.5zm7-.5H9.5l-.5.5V12h6V3z\"/></svg>";
