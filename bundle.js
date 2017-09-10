@@ -169,24 +169,6 @@ $(function() {
           details.className = "details";
           details.innerHTML = makeAvatar(result) + "\n<div class=\"message\"><blockquote>\n" + result.payload.issue.title + "\n</blockquote>\n</div>";
         }
-      } else if (result.type == "CommitCommentEvent") {
-        item.className = "alert issues_comment";
-        body.innerHTML = "<svg aria-label=\"Commit comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
-        body.appendChild(makeTime(result));
-        title.innerHTML = "<a href=\"https://github.com/" + result.actor.login + "\" data-ga-click=\"News feed, event click, Event click type:CommitCommentEvent target:actor\">" + result.actor.display_login + "</a> commented on commit <a href=\"https://github.com/" + result.repo.name + "/commit/" + result.payload.comment.commit_id + "#commitcomment-" + result.payload.comment.id + "\" data-ga-click=\"News feed, event click, Event click type:CommitCommentEvent target:commit-comment\">" + result.repo.name + "@" + result.payload.comment.commit_id.substring(0, 7) + "</a>"
-        body.appendChild(title);
-        details.className = "details";
-        details.innerHTML = makeAvatar(result) + "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
-      } else if (result.type == "IssueCommentEvent") {
-        if (result.payload.action == "created") {
-          item.className = "alert issues_comment";
-          body.innerHTML = "<svg aria-label=\"Issue comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
-          body.appendChild(makeTime(result));
-          title.innerHTML = "<a href=\"https://github.com/" + result.actor.login + "\" data-ga-click=\"News feed, event click, Event click type:IssueCommentEvent target:actor\">" + result.actor.display_login + "</a> commented on issue <a href=\"https://github.com/" + result.repo.name + "/issues/" + result.payload.issue.number + "#issuecomment-" + result.payload.comment.id + "\" data-ga-click=\"News feed, event click, Event click type:IssueCommentEvent target:issue-comment\" title=\"" + result.payload.issue.title + "\">" + result.repo.name + "#" + result.payload.issue.number + "</a>"
-          body.appendChild(title);
-          details.className = "details";
-          details.innerHTML = makeAvatar(result) + "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
-        }
       } else if (result.type == "PullRequestEvent") {
         if (result.payload.action == "opened" || result.payload.action == "closed") {
           item.className = "alert issues_" + result.payload.action;
@@ -200,6 +182,28 @@ $(function() {
           body.appendChild(title);
           details.className = "details";
           details.innerHTML = makeAvatar(result) + "\n<div class=\"message\"><blockquote>\n" + result.payload.pull_request.title + "\n</blockquote>\n</div>\n<div class=\"pull-info\"><svg aria-hidden=\"true\" class=\"octicon octicon-git-commit\" height=\"16\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"14\"><path fill-rule=\"evenodd\" d=\"M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z\"/></svg>\n<em>" + result.payload.pull_request.number + "</em> commits with\n<em>" + result.payload.pull_request.additions + "</em> additions and\n<em>" + result.payload.pull_request.deletions + "</em> deletions</div>";
+        }
+      } else if (result.type == "CommitCommentEvent") {
+        item.className = "alert issues_comment";
+        body.innerHTML = "<svg aria-label=\"Commit comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
+        body.appendChild(makeTime(result));
+        title.innerHTML = "<a href=\"https://github.com/" + result.actor.login + "\" data-ga-click=\"News feed, event click, Event click type:CommitCommentEvent target:actor\">" + result.actor.display_login + "</a> commented on commit <a href=\"https://github.com/" + result.repo.name + "/commit/" + result.payload.comment.commit_id + "#commitcomment-" + result.payload.comment.id + "\" data-ga-click=\"News feed, event click, Event click type:CommitCommentEvent target:commit-comment\">" + result.repo.name + "@" + result.payload.comment.commit_id.substring(0, 7) + "</a>"
+        body.appendChild(title);
+        details.className = "details";
+        details.innerHTML = makeAvatar(result) + "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
+      } else if (result.type == "IssueCommentEvent") {
+        if (result.payload.action == "created") {
+          item.className = "alert issues_comment";
+          body.innerHTML = "<svg aria-label=\"Issue comment\" class=\"octicon octicon-comment-discussion dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 16 16\" width=\"32\"><path fill-rule=\"evenodd\" d=\"M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z\"/></svg>";
+          body.appendChild(makeTime(result));
+          var type = "issue";
+          if (typeof result.payload.issue.pull_request != "undefined") {
+            type = "pull request";
+          }
+          title.innerHTML = "<a href=\"https://github.com/" + result.actor.login + "\" data-ga-click=\"News feed, event click, Event click type:IssueCommentEvent target:actor\">" + result.actor.display_login + "</a> commented on " + type + " <a href=\"" + result.payload.issue.html_url + "#issuecomment-" + result.payload.comment.id + "\" data-ga-click=\"News feed, event click, Event click type:IssueCommentEvent target:issue-comment\" title=\"" + result.payload.issue.title + "\">" + result.repo.name + "#" + result.payload.issue.number + "</a>"
+          body.appendChild(title);
+          details.className = "details";
+          details.innerHTML = makeAvatar(result) + "\n<div class=\"message markdown-body\"><blockquote>\n" + result.payload.comment.body + "\n</blockquote>\n</div>";
         }
       } else if (result.type == "CreateEvent") {
         item.className = "alert create simple";
