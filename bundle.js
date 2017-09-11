@@ -75,17 +75,29 @@ var parseMarkdown = function(text, context) {
   return message;
 }
 
-$(function() {
+var loadFeeds = function(grp) {
   var author, branch, ref, commit_cb, callback, limit, params, repo, title, url, urls, username, results, keys, dash, ajax, i, j;
   params = $.getUrlVars();
-  if (typeof params.group != "undefined") {
-    group = groups[params.group];
-  }
+  group = groups[grp];
   limit = params.limit;
   results = new Object();
   keys = [];
   dash = $('#dashboard');
   dash.empty();
+  var switcher = document.createElement("div");
+  switcher.className = "select-menu account-switcher js-menu-container js-select-menu";
+  switcher.innerHTML = "<button class=\"btn select-menu-button js-menu-target\" aria-haspopup=\"true\" aria-expanded=\"false\" aria-label=\"Switch account context\" type=\"button\" data-ga-click=\"Dashboard, click, Opened account context switcher\">\n<span class=\"js-select-button css-truncate css-truncate-target\">" + grp + "</span>\n</button>";
+  dash.append(switcher);
+  var menu = document.createElement("div");
+  menu.className = "select-menu-modal-holder js-menu-content select-menu-modal js-navigation-container select-menu-list";
+  menu.setAttribute("role", "menu");
+  menu.setAttribute("aria-labelledby", "context-switch-title");
+  for (g in groups) {
+    if (groups.hasOwnProperty(g)) {
+      menu.innerHTML += "<a href=\"?group=" + g + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open selected\">" + g + "</a>"
+    }
+  }
+  switcher.appendChild(menu);
   commit_cb = function(response, id, h) {
     if (response.data.author == null) {
       results[id].payload.commits[h].author = {
@@ -330,6 +342,15 @@ $(function() {
       dash.append(item);
     }
   });
+};
+
+$(function() {
+  var params = $.getUrlVars();
+  var grp = params.group;
+  if (typeof grp == "undefined") {
+    grp = default_group;
+  }
+  loadFeeds(grp);
 });
 
 /**
