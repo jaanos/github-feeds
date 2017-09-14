@@ -2,6 +2,8 @@
 
 A GitHub event feed viewer which allows setting up and switching between multiple groups of feeds.
 
+Available under the [MIT license](LICENSE). Includes the [`timeago`](https://github.com/rmm5t/jquery-timeago) jQuery plugin by [Ryan McGeary](https://github.com/rmm5t), which is also available under the same license.
+
 ## Installation
 
 Clone or download the repository, and then copy `settings.js.sample` into `settings.js`. You can then edit this file to set up your feeds.
