@@ -25,6 +25,14 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+var getToken = function() {
+  if (token) {
+    return "access_token=" + token;
+  } else {
+    return "";
+  }
+}
+
 var makeTime = function(result) {
   var time = document.createElement("div");
   time.className = "time";
@@ -59,7 +67,7 @@ var parseMarkdown = function(text, context) {
   message.className = "message markdown-body";
   var blockquote = document.createElement("blockquote");
   message.appendChild(blockquote);
-  $.ajax("https://api.github.com/markdown?access_token=" + token, {
+  $.ajax("https://api.github.com/markdown?" + getToken(), {
       data: JSON.stringify({
         "text": text,
         "mode": "gfm",
@@ -94,7 +102,8 @@ var loadFeeds = function(grp) {
   menu.setAttribute("aria-labelledby", "context-switch-title");
   for (g in groups) {
     if (groups.hasOwnProperty(g)) {
-      menu.innerHTML += "<a href=\"?group=" + g + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open selected\">" + g + "</a>"
+      selected = g == grp ? " selected" : "";
+      menu.innerHTML += "<a href=\"?group=" + g + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open" + selected + "\"><svg aria-hidden=\"true\" class=\"octicon octicon-check select-menu-item-icon\" height=\"16\" version=\"1.1\" viewBox=\"0 0 12 16\" width=\"12\"><path fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z\"/></svg><span class=\"select-menu-item-text\">" + g + "</span></a>"
     }
   }
   switcher.appendChild(menu);
@@ -135,7 +144,7 @@ var loadFeeds = function(grp) {
     }
   }
   ajax = urls.map(function(url) {
-    return $.ajax(url + "?callback=callback&access_token=" + token, {
+    return $.ajax(url + "?callback=callback&" + getToken(), {
       data: {
         per_page: limit
       },
@@ -239,7 +248,7 @@ var loadFeeds = function(grp) {
                 var id = result.id;
                 var coms = result.payload.commits;
                 var h = coms.length-j;
-                commit_reqs.push($.ajax(coms[h].url + "?callback=commit_cb&access_token=" + token, {
+                commit_reqs.push($.ajax(coms[h].url + "?callback=commit_cb&" + getToken(), {
                     dataType: "jsonp",
                     type: "get"
                   }).success(function(response) {
@@ -347,8 +356,13 @@ var loadFeeds = function(grp) {
 $(function() {
   var params = $.getUrlVars();
   var grp = params.group;
-  if (typeof grp == "undefined") {
-    grp = default_group;
+  if (!grp) {
+    for (g in groups) {
+      if (groups.hasOwnProperty(g)) {
+        grp = g;
+        break;
+      }
+    }
   }
   loadFeeds(grp);
 });
