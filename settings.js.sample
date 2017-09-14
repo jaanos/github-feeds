@@ -1,0 +1,20 @@
+var token = "";
+
+var groups = {
+    "sample": {
+        "users": [
+            "jaanos",
+        ],
+        "repos": [
+            "jaanos/github-feeds",
+        ],
+        "networks": [
+            "roramirez/github-latest-commits-widget",
+        ],
+    },
+    "github": {
+        "orgs": [
+            "github", "github-tools",
+        ],
+    },
+}
