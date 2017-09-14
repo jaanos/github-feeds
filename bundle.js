@@ -56,9 +56,13 @@ var makeLink = function(result, href, text, actor, title, cls) {
   return "<a href=\"" + href + "\"" + classTag + " data-ga-click=\"News feed, event click, Event click type:" + result.type + " target:" + actor + "\"" + titleTag + ">" + text + "</a>";
 };
 
-var makeCommit = function(commit) {
+var makeCommit = function(commit, result) {
   var li = document.createElement("li");
-  li.innerHTML = "<span title=\"" + commit.author.login + "\">\n<img alt=\"" + commit.author.login + "\" height=\"16\" src=\"" + commit.author.avatar_url + "&amp;s=32\" width=\"16\" />\n</span>\n<code><a href=\"" + commit.html_url + "\" data-ga-click=\"News feed, event click, Event click type:PushEvent target:sha\">" + commit.sha.substring(0, 7) + "</a></code>\n<div class=\"message\">\n<blockquote>\n" + commit.message + "\n</blockquote>\n</div>"
+  var url = commit.html_url;
+  if (typeof url == "undefined") {
+    url = "https://github.com/" + result.repo.name + "/commit/" + commit.sha;
+  }
+  li.innerHTML = "<span title=\"" + commit.author.login + "\">\n<img alt=\"" + commit.author.login + "\" height=\"16\" src=\"" + commit.author.avatar_url + "&amp;s=32\" width=\"16\" />\n</span>\n<code><a href=\"" + url + "\" data-ga-click=\"News feed, event click, Event click type:PushEvent target:sha\">" + commit.sha.substring(0, 7) + "</a></code>\n<div class=\"message\">\n<blockquote>\n" + commit.message + "\n</blockquote>\n</div>"
   return li;
 }
 
@@ -263,9 +267,9 @@ var loadFeeds = function(grp) {
               $.when.apply($, commit_reqs).done(function() {
                 var coms = results[h].payload.commits;
                 var text;
-                u.append(makeCommit(coms[coms.length-1]));
+                u.append(makeCommit(coms[coms.length-1], res));
                 if (coms.length >= 2) {
-                  u.append(makeCommit(coms[coms.length-2]));
+                  u.append(makeCommit(coms[coms.length-2], res));
                   var li = document.createElement("li");
                   li.className = "more";
                   if (coms.length == 2) {
