@@ -21,7 +21,7 @@ The access token will appear in the list, so you can copy it into `settings.js`,
 var token = "0123456789abcdef0123456789abcdef01234567";
 ```
 
-Usage is also possible without the token, however expect to exceed the API hourly limit extremely quickly.
+Usage is also possible without the token, however expect to exceed the API hourly limit extremely quickly. The token can also be input interactively (but will not be stored for future use).
 
 ### Feed groups
 

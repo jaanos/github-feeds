@@ -100,17 +100,21 @@ var loadFeeds = function(grp) {
   switcher.className = "select-menu account-switcher js-menu-container js-select-menu";
   switcher.innerHTML = "<button class=\"btn select-menu-button js-menu-target\" aria-haspopup=\"true\" aria-expanded=\"false\" aria-label=\"Switch account context\" type=\"button\" data-ga-click=\"Dashboard, click, Opened account context switcher\">\n<span class=\"js-select-button css-truncate css-truncate-target\">" + grp + "</span>\n</button>";
   dash.append(switcher);
+  var holder = document.createElement("div");
+  holder.className = "select-menu-modal-holder js-menu-content js-navigation-container";
   var menu = document.createElement("div");
-  menu.className = "select-menu-modal-holder js-menu-content select-menu-modal js-navigation-container select-menu-list";
+  menu.className = "select-menu-modal select-menu-list";
   menu.setAttribute("role", "menu");
   menu.setAttribute("aria-labelledby", "context-switch-title");
   for (g in groups) {
     if (groups.hasOwnProperty(g)) {
       selected = g == grp ? " selected" : "";
-      menu.innerHTML += "<a href=\"?group=" + g + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open" + selected + "\"><svg aria-hidden=\"true\" class=\"octicon octicon-check select-menu-item-icon\" height=\"16\" version=\"1.1\" viewBox=\"0 0 12 16\" width=\"12\"><path fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z\"/></svg><span class=\"select-menu-item-text\">" + g + "</span></a>"
+      menu.innerHTML += "<a href=\"?group=" + g + "&token=" + token + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open" + selected + "\"><svg aria-hidden=\"true\" class=\"octicon octicon-check select-menu-item-icon\" height=\"16\" version=\"1.1\" viewBox=\"0 0 12 16\" width=\"12\"><path fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z\"/></svg><span class=\"select-menu-item-text\">" + g + "</span></a>"
     }
   }
-  switcher.appendChild(menu);
+  holder.appendChild(menu);
+  switcher.appendChild(holder);
+  switcher.innerHTML += "<div class=\"float-right\"><a href=\"#\" id=\"token-text\" style=\"display:block\" onclick=\"this.style.display='none'; document.getElementById('token-form').style.display = 'block'; return false;\">Change token</a><form id=\"token-form\" style=\"display:none\"><input type=\"hidden\" name=\"group\" value=\"" + grp + "\"><input class=\"form-control\" id=\"token\" type=\"text\" name=\"token\" value=\"" + token + "\" size=\"36\">&nbsp;<input class=\"btn\" type=\"submit\" value=\"Use\"></form></div>";
   commit_cb = function(response, id, h) {
     if (response.data.author == null) {
       results[id].payload.commits[h].author = {
@@ -360,6 +364,9 @@ var loadFeeds = function(grp) {
 $(function() {
   var params = $.getUrlVars();
   var grp = params.group;
+  if (typeof params.token != "undefined") {
+    token = params.token;
+  }
   if (!grp) {
     for (g in groups) {
       if (groups.hasOwnProperty(g)) {
