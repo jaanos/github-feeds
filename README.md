@@ -2,7 +2,7 @@
 
 A GitHub event feed viewer which allows setting up and switching between multiple groups of feeds.
 
-Available under the [MIT license](LICENSE). Includes the [`timeago`](https://github.com/rmm5t/jquery-timeago) jQuery plugin by [Ryan McGeary](https://github.com/rmm5t), which is also available under the same license.
+Available under the [MIT license](LICENSE). Includes the [`timeago`](https://github.com/rmm5t/jquery-timeago) jQuery plugin by [Ryan McGeary](https://github.com/rmm5t), which is also available under the same license. Derived from the [GitHub latest commits widget](https://github.com/TylerLH/github-latest-commits-widget) originally developed by [Tyler Hughes](https://github.com/TylerLH), which is available under the [Apache 2.0 license](NOTICE.md).
 
 ## Installation
 

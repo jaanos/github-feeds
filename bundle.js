@@ -1,4 +1,12 @@
 /*
+Derived from the source available under the Apache 2.0 license:
+- original by Tyler Hughes @ https://github.com/TylerLH/github-latest-commits-widget/blob/12d3ea2184581136979d00ab50fcd3b30ac65ee9/dist/javascripts/bundle.js
+- modification by Rodrigo Ramírez Norambuena @ https://github.com/roramirez/github-latest-commits-widget/blob/83338651c9ffe0c3c746b18b1f3459f2c930e159/dist/javascripts/bundle.js
+
+Further modifications under the MIT license are by Janoš Vidali
+*/
+
+/*
  Helper to parse query string params
  */
 $.extend({
