@@ -96,7 +96,7 @@ var parseMarkdown = function(text, context) {
 }
 
 var loadFeeds = function(grp) {
-  var author, branch, ref, commit_cb, callback, limit, params, repo, title, url, urls, username, results, keys, dash, ajax, i, j;
+  var author, branch, ref, commit_cb, repo_cb, callback, limit, params, repo, title, url, urls, username, results, keys, dash, ajax, i, j;
   params = $.getUrlVars();
   group = groups[grp];
   limit = params.limit;
@@ -134,6 +134,10 @@ var loadFeeds = function(grp) {
     }
     results[id].payload.commits[h].committer = response.data.committer;
     results[id].payload.commits[h].html_url = response.data.html_url;
+    return true;
+  }
+  repo_cb = function(response, details) {
+    details.innerHTML += "<div class=\"message\">" + response.data.description + "</div>"
     return true;
   }
   callback = function(response) {
@@ -357,6 +361,24 @@ var loadFeeds = function(grp) {
           }
           commits.appendChild(ul);
           details.appendChild(commits);
+        } else if (result.type == "PublicEvent") {
+          item.className += "public";
+          body.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"octicon octicon-repo dashboard-event-icon\" height=\"32\" viewBox=\"0 0 12 16\" width=\"24\"><path fill-rule=\"evenodd\" d=\"M4 9H3V8h1v1zm0-3H3v1h1V6zm0-2H3v1h1V4zm0-2H3v1h1V2zm8-1v12c0 .55-.45 1-1 1H6v2l-1.5-1.5L3 16v-2H1c-.55 0-1-.45-1-1V1c0-.55.45-1 1-1h10c.55 0 1 .45 1 1zm-1 10H1v2h2v-1h3v1h5v-2zm0-10H2v9h9V1z\"/></svg>";
+          action = "made " + makeLink(result, "https://github.com/" + result.repo.name, result.repo.name, "repo") + " public";
+          (function() {
+            var det = details;
+            $.ajax(result.repo.url + "?callback=repo_cb&" + getToken(), {
+              dataType: "jsonp",
+              type: "get"
+            }).success(function(response) {
+              return repo_cb(response, det);
+            })
+          })();
+        } else if (result.type == "ReleaseEvent") {
+          item.className += "release";
+          body.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"octicon octicon-tag dashboard-event-icon\" height=\"32\" viewBox=\"0 0 14 16\" width=\"28\"><path fill-rule=\"evenodd\" d=\"M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 0 0 0-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z\"/></svg>";
+          action = "released " + makeLink(result, result.payload.release.html_url, result.payload.release.name, "release") + " at " + makeLink(result, "https://github.com/" + result.repo.name, result.repo.name, "repo");
+          details.innerHTML += "<ul><li><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"octicon octicon-cloud-download\" height=\"16\" viewBox=\"0 0 16 16\" width=\"16\"><path fill-rule=\"evenodd\" d=\"M9 12h2l-3 3-3-3h2V7h2v5zm3-8c0-.44-.91-3-4.5-3C5.08 1 3 2.92 3 5 1.02 5 0 6.52 0 8c0 1.53 1 3 3 3h3V9.7H3C1.38 9.7 1.3 8.28 1.3 8c0-.17.05-1.7 1.7-1.7h1.3V5c0-1.39 1.56-2.7 3.2-2.7 2.55 0 3.13 1.55 3.2 1.8v1.2H12c.81 0 2.7.22 2.7 2.2 0 2.09-2.25 2.2-2.7 2.2h-2V11h2c2.08 0 4-1.16 4-3.5C16 5.06 14.08 4 12 4z\"/></svg>\n<div class=\"message\">" + makeLink(result, result.payload.release.zipball_url, "Source code (zip)", "asset") + "</div></li></ul>"
         }
         body.appendChild(makeTime(result));
         body.appendChild(title);
