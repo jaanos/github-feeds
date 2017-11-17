@@ -137,7 +137,9 @@ var loadFeeds = function(grp) {
     return true;
   }
   repo_cb = function(response, details) {
-    details.innerHTML += "<div class=\"message\">" + response.data.description + "</div>"
+    if (response.data.description) {
+      details.innerHTML += "<div class=\"message\">" + response.data.description + "</div>"
+    }
     return true;
   }
   callback = function(response) {
