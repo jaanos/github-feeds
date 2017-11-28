@@ -33,6 +33,22 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+var AJAX = function(url, data, success) {
+  var a, d;
+  d = $.Deferred();
+  $.ajax(url, data).success(function(response) {
+    if (response.meta.status == 301 || response.meta.status == 302) {
+      AJAX(response.meta.Location, data, success).done(function() {
+        d.resolve();
+      });
+    } else {
+      success(response);
+      d.resolve();
+    }
+  });
+  return d;
+}
+
 var getToken = function() {
   if (token) {
     return "access_token=" + token;
@@ -166,13 +182,13 @@ var loadFeeds = function(grp) {
     }
   }
   ajax = urls.map(function(url) {
-    return $.ajax(url + "?callback=callback&" + getToken(), {
+    return AJAX(url + "?callback=callback&" + getToken(), {
       data: {
         per_page: limit
       },
       dataType: "jsonp",
       type: "get"
-    }).success(function(response) {
+    }, function(response) {
       return callback(response);
     });
   });
@@ -270,10 +286,10 @@ var loadFeeds = function(grp) {
                 var id = result.id;
                 var coms = result.payload.commits;
                 var h = coms.length-j;
-                commit_reqs.push($.ajax(coms[h].url + "?callback=commit_cb&" + getToken(), {
+                commit_reqs.push(AJAX(coms[h].url + "?callback=commit_cb&" + getToken(), {
                     dataType: "jsonp",
                     type: "get"
-                  }).success(function(response) {
+                  }, function(response) {
                     return commit_cb(response, id, h);
                   }));
               })();
@@ -369,12 +385,12 @@ var loadFeeds = function(grp) {
           action = "made " + makeLink(result, "https://github.com/" + result.repo.name, result.repo.name, "repo") + " public";
           (function() {
             var det = details;
-            $.ajax(result.repo.url + "?callback=repo_cb&" + getToken(), {
+            AJAX(result.repo.url + "?callback=repo_cb&" + getToken(), {
               dataType: "jsonp",
               type: "get"
-            }).success(function(response) {
+            }, function(response) {
               return repo_cb(response, det);
-            })
+            });
           })();
         } else if (result.type == "ReleaseEvent") {
           item.className += "release";
