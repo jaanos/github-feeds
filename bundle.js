@@ -68,16 +68,25 @@ var makeAvatar = function(result) {
   return "<a href=\"https://github.com/" + result.actor.login + "\"><img alt=\"@" + result.actor.login + "\" class=\"gravatar\" height=\"30\" src=\"" + result.actor.avatar_url + "&s=60\" width=\"30\" /></a>";
 }
 
+var tagHTML = function(tag) {
+  return tag.wrap('<div>').parent().html();
+}
+
 var makeLink = function(result, href, text, actor, title, cls) {
   var titleTag = "";
   var classTag = "";
+  var tag = $("<a>");
+  tag.attr({
+    "href": href,
+    "data-ga-click": "News feed, event click, Event click type:" + result.type + " target:" + actor
+  }).text(text);
   if (typeof title != "undefined") {
-    titleTag = " title=\"" + title + "\"";
+    tag.attr("title", title);
   }
   if (typeof cls != "undefined") {
-    classTag = " class=\"" + cls + "\"";
+    tag.attr("class", cls);
   }
-  return "<a href=\"" + href + "\"" + classTag + " data-ga-click=\"News feed, event click, Event click type:" + result.type + " target:" + actor + "\"" + titleTag + ">" + text + "</a>";
+  return tagHTML(tag);
 };
 
 var makeCommit = function(commit, result) {
@@ -86,7 +95,7 @@ var makeCommit = function(commit, result) {
   if (typeof url == "undefined") {
     url = "https://github.com/" + result.repo.name + "/commit/" + commit.sha;
   }
-  li.innerHTML = "<span title=\"" + commit.author.login + "\">\n<img alt=\"" + commit.author.login + "\" height=\"16\" src=\"" + commit.author.avatar_url + "&amp;s=32\" width=\"16\" />\n</span>\n<code><a href=\"" + url + "\" data-ga-click=\"News feed, event click, Event click type:PushEvent target:sha\">" + commit.sha.substring(0, 7) + "</a></code>\n<div class=\"message\">\n<blockquote>\n" + commit.message + "\n</blockquote>\n</div>"
+  li.innerHTML = "<span title=\"" + commit.author.login + "\">\n<img alt=\"" + commit.author.login + "\" height=\"16\" src=\"" + commit.author.avatar_url + "&amp;s=32\" width=\"16\" />\n</span>\n<code><a href=\"" + url + "\" data-ga-click=\"News feed, event click, Event click type:PushEvent target:sha\">" + commit.sha.substring(0, 7) + "</a></code>\n<div class=\"message\">\n" + tagHTML($("<blockquote>").text(commit.message)) + "\n</div>"
   return li;
 }
 
@@ -122,7 +131,7 @@ var loadFeeds = function(grp) {
   dash.empty();
   var switcher = document.createElement("div");
   switcher.className = "select-menu account-switcher js-menu-container js-select-menu";
-  switcher.innerHTML = "<button class=\"btn select-menu-button js-menu-target\" aria-haspopup=\"true\" aria-expanded=\"false\" aria-label=\"Switch account context\" type=\"button\" data-ga-click=\"Dashboard, click, Opened account context switcher\">\n<span class=\"js-select-button css-truncate css-truncate-target\">" + grp + "</span>\n</button>";
+  switcher.innerHTML = "<button class=\"btn select-menu-button js-menu-target\" aria-haspopup=\"true\" aria-expanded=\"false\" aria-label=\"Switch account context\" type=\"button\" data-ga-click=\"Dashboard, click, Opened account context switcher\">\n" + tagHTML($("<span>").attr("class", "js-select-button css-truncate css-truncate-target").text(grp)) + "\n</button>";
   dash.append(switcher);
   var holder = document.createElement("div");
   holder.className = "select-menu-modal-holder js-menu-content js-navigation-container";
@@ -133,7 +142,7 @@ var loadFeeds = function(grp) {
   for (g in groups) {
     if (groups.hasOwnProperty(g)) {
       selected = g == grp ? " selected" : "";
-      menu.innerHTML += "<a href=\"?group=" + g + "&token=" + token + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open" + selected + "\"><svg aria-hidden=\"true\" class=\"octicon octicon-check select-menu-item-icon\" height=\"16\" version=\"1.1\" viewBox=\"0 0 12 16\" width=\"12\"><path fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z\"/></svg><span class=\"select-menu-item-text\">" + g + "</span></a>"
+      menu.innerHTML += "<a href=\"?group=" + g + "&token=" + token + "\" role=\"menuitem\" class=\"select-menu-item js-navigation-item js-navigation-open" + selected + "\"><svg aria-hidden=\"true\" class=\"octicon octicon-check select-menu-item-icon\" height=\"16\" version=\"1.1\" viewBox=\"0 0 12 16\" width=\"12\"><path fill-rule=\"evenodd\" d=\"M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z\"/></svg>" + tagHTML($("<span>").attr("class", "select-menu-item-text").text(g)) + "</a>";
     }
   }
   holder.appendChild(menu);
@@ -154,7 +163,7 @@ var loadFeeds = function(grp) {
   }
   repo_cb = function(response, details) {
     if (response.data.description) {
-      details.innerHTML += "<div class=\"message\">" + response.data.description + "</div>"
+      details.innerHTML += tagHTML($("<div>").attr("class", "message").text(response.data.description));
     }
     return true;
   }
@@ -274,7 +283,7 @@ var loadFeeds = function(grp) {
           body.innerHTML = "<svg aria-label=\"Push\" class=\"octicon octicon-git-commit dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"28\"><path fill-rule=\"evenodd\" d=\"M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z\"/></svg>";
           action = "pushed to " + makeLink(result, "https://github.com/" + result.repo.name + "/tree/" + branch, branch, "branch") + " at " + makeLink(result, "https://github.com/" + result.repo.name, result.repo.name, "repo")
           if (result.payload.commits.length == 0) {
-            details.innerHTML += "<strong>" + branch + "</strong> is now <code>" + makeLink(result, "https://github.com/" + result.repo.name + "/commit/" + result.payload.head, result.payload.head.substring(0, 7), "commit") + "</code>";
+            details.innerHTML += tagHTML($("<strong>").text(branch)) + " is now <code>" + makeLink(result, "https://github.com/" + result.repo.name + "/commit/" + result.payload.head, result.payload.head.substring(0, 7), "commit") + "</code>";
           } else {
             var commits = document.createElement("div");
             commits.className = "commits";
@@ -329,7 +338,7 @@ var loadFeeds = function(grp) {
             body.innerHTML = "<svg aria-label=\"Issue\" class=\"octicon octicon-issue-opened dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"28\"><path fill-rule=\"evenodd\" d=\"M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z\"/></svg>";
           }
           action = result.payload.action + " issue " + makeLink(result, result.payload.issue.html_url, result.repo.name + "#" + result.payload.issue.number, "issue", result.payload.issue.title);
-          details.innerHTML += "\n<div class=\"message\"><blockquote>\n" + result.payload.issue.title + "\n</blockquote>\n</div>";
+          details.innerHTML += "\n<div class=\"message\">" + tagHTML($("<blockquote>").text(result.payload.issue.title)) + "\n</div>";
         } else if (result.type == "PullRequestEvent") {
           item.className += "issues_" + result.payload.action;
           body.innerHTML = "<svg aria-label=\"Pull request\" class=\"octicon octicon-git-pull-request dashboard-event-icon\" height=\"32\" role=\"img\" version=\"1.1\" viewBox=\"0 0 12 16\" width=\"24\"><path fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"/></svg>";
@@ -337,9 +346,9 @@ var loadFeeds = function(grp) {
           if (action == "closed" && result.payload.pull_request.merged) {
             action = "merged";
           }
-          details.innerHTML += "\n<div class=\"message\"><blockquote>\n" + result.payload.pull_request.title + "\n</blockquote>";
+          details.innerHTML += "\n<div class=\"message\">" + tagHTML($("<blockquote>").text(result.payload.pull_request.title)) + "\n</div>";
           if (action != "closed") {
-            details.innerHTML += "\n</div>\n<div class=\"pull-info\"><svg aria-hidden=\"true\" class=\"octicon octicon-git-commit\" height=\"16\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"14\"><path fill-rule=\"evenodd\" d=\"M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z\"/></svg>\n<em>" + result.payload.pull_request.commits + "</em> commits with\n<em>" + result.payload.pull_request.additions + "</em> additions and\n<em>" + result.payload.pull_request.deletions + "</em> deletions</div>";
+            details.innerHTML += "\n<div class=\"pull-info\"><svg aria-hidden=\"true\" class=\"octicon octicon-git-commit\" height=\"16\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"14\"><path fill-rule=\"evenodd\" d=\"M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z\"/></svg>\n" + tagHTML($("<em>").text(result.payload.pull_request.commits)) + " commits with\n" + tagHTML($("<em>").text(result.payload.pull_request.additions)) + " additions and\n" + tagHTML($("<em>").text(result.payload.pull_request.deletions)) + " deletions</div>";
           }
           action += " pull request " + makeLink(result, result.payload.pull_request.html_url, result.repo.name + "#" + result.payload.pull_request.number, "pull", result.payload.pull_request.title);
         } else if (result.type == "CommitCommentEvent") {
