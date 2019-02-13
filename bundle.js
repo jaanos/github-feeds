@@ -72,6 +72,14 @@ var tagHTML = function(tag) {
   return tag.wrap('<div>').parent().html();
 }
 
+var pluralize = function(text, n) {
+  if (n == 1) {
+    return text;
+  } else {
+    return text + "s";
+  }
+}
+
 var makeLink = function(result, href, text, actor, title, cls) {
   var titleTag = "";
   var classTag = "";
@@ -348,7 +356,7 @@ var loadFeeds = function(grp) {
           }
           details.innerHTML += "\n<div class=\"message\">" + tagHTML($("<blockquote>").text(result.payload.pull_request.title)) + "\n</div>";
           if (action != "closed") {
-            details.innerHTML += "\n<div class=\"pull-info\"><svg aria-hidden=\"true\" class=\"octicon octicon-git-commit\" height=\"16\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"14\"><path fill-rule=\"evenodd\" d=\"M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z\"/></svg>\n" + tagHTML($("<em>").text(result.payload.pull_request.commits)) + " commits with\n" + tagHTML($("<em>").text(result.payload.pull_request.additions)) + " additions and\n" + tagHTML($("<em>").text(result.payload.pull_request.deletions)) + " deletions</div>";
+            details.innerHTML += "\n<div class=\"pull-info\"><svg aria-hidden=\"true\" class=\"octicon octicon-git-commit\" height=\"16\" version=\"1.1\" viewBox=\"0 0 14 16\" width=\"14\"><path fill-rule=\"evenodd\" d=\"M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z\"/></svg>\n" + tagHTML($("<em>").text(result.payload.pull_request.commits)) + " " + pluralize("commit", result.payload.pull_request.commits) + " with\n" + tagHTML($("<em>").text(result.payload.pull_request.additions)) + " " + pluralize("addition", result.payload.pull_request.additions) + " and\n" + tagHTML($("<em>").text(result.payload.pull_request.deletions)) + " " + pluralize("deletion", result.payload.pull_request.deletions) + "</div>";
           }
           action += " pull request " + makeLink(result, result.payload.pull_request.html_url, result.repo.name + "#" + result.payload.pull_request.number, "pull", result.payload.pull_request.title);
         } else if (result.type == "CommitCommentEvent") {
